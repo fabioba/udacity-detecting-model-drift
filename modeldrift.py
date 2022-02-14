@@ -111,7 +111,7 @@ def check_parametric_past_scores(list_scores):
 
 def check_non_parametric_past_scores(list_scores):
     """
-        Check if all past scores are worse the current one, using parametric test
+        Check if all past scores are worse the current one, using NON-parametric test
 
         Args:
             list_scores(list): list scores
@@ -119,24 +119,23 @@ def check_non_parametric_past_scores(list_scores):
     try:
         logger.info('START')
 
+        # calculate interquartile range
+        iqr = np.quantile(list_scores,0.75)-np.quantile(list_scores,0.25)
 
-        # calculate parametric statistics
-        mean_past_scores=np.mean(list_scores)
-        std_past_scores=np.std(list_scores)
-
-        logger.info('standard deviation past scores: {}'.format(std_past_scores))
+        logger.info('interquartile range: {}'.format(iqr))
 
         # this value is the upper limit of worse scoring value, if the current value is less than this, so there's model drift
-        value_worse_score=mean_past_scores - std_past_scores*2
+        value_worse_score = iqr<np.quantile(list_scores,0.25)-iqr*1.5
+
 
         logger.info('limit value worse score: {}'.format(value_worse_score))
 
 
 
         if value_worse_score<newr2:
-            logger.info('PARAMETRIC TEST: current r2 is NOT worse than past scores')
+            logger.info('NON-PARAMETRIC TEST: current r2 is NOT worse than past scores')
         elif value_worse_score>newr2:
-            logger.info('PARAMETRIC TEST: current r2 is worse than past scores')
+            logger.info('NON-PARAMETRIC TEST: current r2 is worse than past scores')
 
 
     except Exception as err:
